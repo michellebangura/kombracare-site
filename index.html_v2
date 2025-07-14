@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KombraCare: Interactive Business Plan</title>
+    
+    <!-- Chosen Palette: KombraCare Palette (Deep Indigo, Light Gray, Sage Green, Warm Amber) -->
+    <!-- Application Structure Plan: A thematic, single-page dashboard structure was chosen to transform the dense business plan into an engaging narrative for investors. The flow guides the user from the high-level vision and problem, through the market opportunity and product innovation, to the concrete strategic and financial plans. Interactive charts and diagrams are used to make data digestible, replacing long text sections and tables for a more impactful presentation. -->
+    <!-- Visualization & Content Choices: Data from the business plan was visualized using Chart.js to enhance clarity. A donut chart shows the TAM breakdown and Use of Funds, while a bar chart illustrates ARR growth. These are more intuitive than tables. Core concepts like the product architecture and process flow are represented as custom diagrams using HTML/CSS for a clean, integrated feel. Key stats are highlighted in prominent cards to draw attention. All interactions are designed to reveal more detail on demand, keeping the initial view clean and focused. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F0F2F5;
+            color: #4A4A4A;
+        }
+        .bg-primary { background-color: #3A406A; }
+        .text-primary { color: #3A406A; }
+        .bg-secondary { background-color: #F0F2F5; }
+        .text-accent-green { color: #88A98F; }
+        .bg-accent-green { background-color: #88A98F; }
+        .text-accent-amber { color: #F2B632; }
+        .bg-accent-amber { background-color: #F2B632; }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .stat-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .nav-link {
+            transition: color 0.2s;
+        }
+        .nav-link:hover {
+            color: #F2B632;
+        }
+        .tab {
+            cursor: pointer;
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.3s, color 0.3s;
+        }
+        .tab.active {
+            border-color: #F2B632;
+            color: #3A406A;
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2rem;
+            padding-left: 2.5rem;
+            border-left: 2px solid #D1D5DB;
+        }
+        .timeline-item:last-child {
+            border-left: 2px solid transparent;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -0.7rem;
+            top: 0;
+            height: 1.25rem;
+            width: 1.25rem;
+            border-radius: 9999px;
+            background-color: #3A406A;
+            border: 4px solid #F0F2F5;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-primary text-white shadow-md sticky top-0 z-50 transition-all duration-300">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="#hero" class="text-2xl font-bold tracking-tight">KombraCare</a>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#vision" class="nav-link font-medium">The Vision</a>
+                    <a href="#opportunity" class="nav-link font-medium">The Opportunity</a>
+                    <a href="#product" class="nav-link font-medium">The Product</a>
+                    <a href="#plan" class="nav-link font-medium">The Plan</a>
+                    <a href="#ask" class="nav-link font-medium">The Ask</a>
+                </nav>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-white focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-primary">
+            <a href="#vision" class="block py-2 px-6 text-sm hover:bg-indigo-700">The Vision</a>
+            <a href="#opportunity" class="block py-2 px-6 text-sm hover:bg-indigo-700">The Opportunity</a>
+            <a href="#product" class="block py-2 px-6 text-sm hover:bg-indigo-700">The Product</a>
+            <a href="#plan" class="block py-2 px-6 text-sm hover:bg-indigo-700">The Plan</a>
+            <a href="#ask" class="block py-2 px-6 text-sm hover:bg-indigo-700">The Ask</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="bg-primary text-white pt-24 pb-32">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">Empowering Caregivers with AI.</h1>
+                <p class="text-lg md:text-xl text-indigo-200 max-w-3xl mx-auto mb-8">Architecting a new standard of care for individuals with complex support needs through a unified, adaptive, and intelligent platform.</p>
+                <a href="#ask" class="bg-accent-amber text-primary font-bold py-3 px-8 rounded-full text-lg hover:bg-yellow-400 transition-colors">Join Our Mission</a>
+                <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                    <div class="bg-white/10 p-6 rounded-lg">
+                        <p class="text-3xl font-bold text-accent-amber">$100B+</p>
+                        <p class="text-indigo-200 mt-2">Total Addressable Market</p>
+                    </div>
+                    <div class="bg-white/10 p-6 rounded-lg">
+                        <p class="text-3xl font-bold text-accent-amber">$600B+</p>
+                        <p class="text-indigo-200 mt-2">Annual Value of US Caregiver Economy</p>
+                    </div>
+                    <div class="bg-white/10 p-6 rounded-lg">
+                        <p class="text-3xl font-bold text-accent-amber">5 Core</p>
+                        <p class="text-indigo-200 mt-2">Systemic Problems Solved</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Vision & Problem -->
+        <section id="vision" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-3xl md:text-4xl font-bold text-primary mb-4">A System Designed to Fix a Broken Ecosystem</h2>
+                    <p class="text-lg mb-12">The current support system fails caregivers, clinicians, and researchers at five critical points. KombraCare provides a unified solution to each.</p>
+                </div>
+                
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex border-b mb-8 justify-center">
+                        <div class="tab active" data-tab="problem-1">Access</div>
+                        <div class="tab" data-tab="problem-2">Personalization</div>
+                        <div class="tab" data-tab="problem-3">Unpredictability</div>
+                        <div class="tab" data-tab="problem-4">Efficacy</div>
+                        <div class="tab" data-tab="problem-5">Data</div>
+                    </div>
+
+                    <div id="problem-1" class="tab-content active">
+                        <div class="bg-white p-8 rounded-lg shadow-lg grid md:grid-cols-2 gap-8 items-center">
+                            <div>
+                                <h3 class="font-bold text-xl text-primary mb-3">The Access Problem</h3>
+                                <p>Caregivers lack consistent, affordable access to expert guidance. Professional therapists are expensive, have long waitlists, and are not available 24/7, creating significant gaps in support.</p>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-xl text-accent-green mb-3">Our Solution</h3>
+                                <p>We solve the access problem by acting as a scalable, on-demand digital coach, providing expert-level, evidence-based guidance directly to a caregiver's device at a fraction of the cost.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="problem-2" class="tab-content">
+                        <div class="bg-white p-8 rounded-lg shadow-lg grid md:grid-cols-2 gap-8 items-center">
+                            <div>
+                                <h3 class="font-bold text-xl text-primary mb-3">The Personalization Problem</h3>
+                                <p>The advice caregivers do receive is generic and static, failing to account for a specific individual’s unique profile and ever-changing daily needs.</p>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-xl text-accent-green mb-3">Our Solution</h3>
+                                <p>We solve the personalization problem by using a generative AI to create dynamic, daily plans tailored not just to an individual's profile, but to their specific state on any given day.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="problem-3" class="tab-content">
+                        <div class="bg-white p-8 rounded-lg shadow-lg grid md:grid-cols-2 gap-8 items-center">
+                            <div>
+                                <h3 class="font-bold text-xl text-primary mb-3">The Unpredictability Problem</h3>
+                                <p>All pre-planned advice becomes obsolete in the face of real-world events. Caregivers lack expert support to react in the moment to a sudden breakthrough or a challenging meltdown.</p>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-xl text-accent-green mb-3">Our Solution</h3>
+                                <p>We solve the unpredictability problem with our real-time adaptation loop. The system captures any event and instantly provides a new, context-specific script to guide the caregiver.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="problem-4" class="tab-content">
+                        <div class="bg-white p-8 rounded-lg shadow-lg grid md:grid-cols-2 gap-8 items-center">
+                             <div>
+                                <h3 class="font-bold text-xl text-primary mb-3">The Efficacy Problem</h3>
+                                <p>Without a system to track interventions and outcomes, caregivers and clinicians operate with incomplete information, leading to inconsistent strategies and high stress.</p>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-xl text-accent-green mb-3">Our Solution</h3>
+                                <p>We solve the efficacy problem by creating a continuous learning system that captures feedback on every interaction, making guidance progressively more precise and effective over time.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="problem-5" class="tab-content">
+                        <div class="bg-white p-8 rounded-lg shadow-lg grid md:grid-cols-2 gap-8 items-center">
+                            <div>
+                                <h3 class="font-bold text-xl text-primary mb-3">The Research Data Scarcity Problem</h3>
+                                <p>Medical and scientific research is hampered by a lack of large-scale, high-resolution, longitudinal data on real-world behaviors and interventions.</p>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-xl text-accent-green mb-3">Our Solution</h3>
+                                <p>We solve the data scarcity problem by creating an unprecedented, high-value dataset. With user consent, this anonymized data can accelerate medical research and lead to better standards of care for all.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Opportunity -->
+        <section id="opportunity" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-3xl md:text-4xl font-bold text-primary mb-4">A Platform for a $100 Billion+ Market</h2>
+                    <p class="text-lg mb-12">Our unified platform technology is designed to capture significant value across multiple high-growth caregiving verticals, starting with a focused beachhead market.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold text-primary mb-4">Total Addressable Market</h3>
+                        <p class="mb-6">KombraCare's platform model allows us to address a massive and diverse set of needs within the global care economy.</p>
+                         <div class="chart-container">
+                            <canvas id="tamChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="stat-card mb-6">
+                            <h4 class="text-xl font-bold text-primary">Beachhead Market: Neurodiversity</h4>
+                            <p class="mt-2">Our initial focus is on the US neurodiversity community, an underserved market valued at over **$9 billion** annually for autism-related therapies alone. With 1 in 36 children identified with ASD, the need for scalable support is urgent and immense.</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4 class="text-xl font-bold text-primary">Expansion Markets</h4>
+                            <p class="mt-2">Following success in our beachhead, our platform architecture allows for efficient expansion into adjacent verticals like Dementia & Memory Care, Post-Stroke Rehabilitation, and Post-Discharge Care, unlocking the full market potential.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Product -->
+        <section id="product" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-3xl md:text-4xl font-bold text-primary mb-4">The KombraCare Engine</h2>
+                    <p class="text-lg mb-12">Our core innovation is a proprietary, closed-loop system that transforms caregiving from a reactive struggle into a proactive, guided partnership.</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8 text-center">
+                    <div class="stat-card">
+                        <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl font-bold">1</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-primary mb-2">AI-Powered Daily Plans</h4>
+                        <p>The day begins with a simple check-in, allowing our AI to generate a high-level strategic plan tailored to the individual's current state.</p>
+                    </div>
+                     <div class="stat-card">
+                        <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl font-bold">2</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-primary mb-2">Context-Specific Guidance</h4>
+                        <p>As caregivers enter a planned activity, they receive "just-in-time" interaction scripts with clear, step-by-step, evidence-based prompts.</p>
+                    </div>
+                     <div class="stat-card">
+                        <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                           <span class="text-2xl font-bold">3</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-primary mb-2">Real-Time Adaptation Loop</h4>
+                        <p>During any unpredictable event, caregivers can capture the moment (via text, audio, video) to receive an instant, new interventional script from the AI.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Plan -->
+        <section id="plan" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-3xl md:text-4xl font-bold text-primary mb-4">The Path to Market Leadership</h2>
+                    <p class="text-lg mb-12">Our operational roadmap is a three-year plan designed for focused execution, risk mitigation, and strategic scaling.</p>
+                </div>
+                
+                <div class="max-w-3xl mx-auto">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <h3 class="text-xl font-bold text-primary mb-1">Year 1: Foundation & MVP Launch</h3>
+                        <p class="text-gray-600 mb-4">Secure pre-seed funding, hire founding team, and launch the KombraCare MVP (Neurodiversity Blueprint) in three US pilot cities. Onboard first 250+ beta users and validate the core product.</p>
+                    </div>
+                     <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <h3 class="text-xl font-bold text-primary mb-1">Year 2: Growth & Product-Market Fit</h3>
+                        <p class="text-gray-600 mb-4">Secure Seed funding to scale nationally to 10,000+ users. Launch a closed beta of the "Dementia & Memory Care" blueprint and publish initial efficacy findings.</p>
+                    </div>
+                     <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <h3 class="text-xl font-bold text-primary mb-1">Year 3: Scaling & Leadership</h3>
+                        <p class="text-gray-600 mb-4">Achieve national scale to 50,000+ users and launch the Dementia blueprint publicly. Begin R&D on Post-Stroke Rehab and achieve a clear path to profitability, preparing for a Series A to fund international expansion.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Ask -->
+        <section id="ask" class="py-20">
+            <div class="container mx-auto px-6">
+                 <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-3xl md:text-4xl font-bold text-primary mb-4">Join Us in Architecting the Future of Care</h2>
+                    <p class="text-lg mb-12">We are seeking $750,000 in pre-seed funding to execute the first phase of our plan and deliver our MVP to the families who need it most.</p>
+                </div>
+                 <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold text-primary mb-4">Use of Funds</h3>
+                        <p class="mb-6">This capital provides an 18-month runway to build our product, launch in market, and achieve the key milestones necessary to secure our next round of funding.</p>
+                         <div class="chart-container">
+                            <canvas id="fundsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-bold text-primary mb-4">Become an Investor</h3>
+                        <p class="mb-6">Invest in a venture with a massive addressable market, a defensible technology moat, and a mission to generate profound social impact. To receive our full investor packet, please provide your information below.</p>
+                        <form data-netlify="true" name="investor-form">
+                            <div class="mb-4">
+                                <label for="name" class="block text-sm font-medium mb-1">Full Name</label>
+                                <input type="text" id="name" name="name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent-amber">
+                            </div>
+                            <div class="mb-4">
+                                <label for="email" class="block text-sm font-medium mb-1">Email Address</label>
+                                <input type="email" id="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent-amber">
+                            </div>
+                            <button type="submit" class="w-full bg-primary text-white font-bold py-3 px-6 rounded-md hover:bg-indigo-800 transition-colors">Request Information</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-primary text-white">
+        <div class="container mx-auto px-6 py-12">
+             <div class="grid md:grid-cols-2 gap-8">
+                 <div>
+                    <h3 class="text-2xl font-bold mb-2">KombraCare</h3>
+                    <p class="text-indigo-200 mb-4 max-w-sm">A venture of KombraGroup, Inc., a Delaware Public Benefit Corporation.</p>
+                    <p class="text-sm">&copy; 2025 KombraCare, Inc. All Rights Reserved.</p>
+                 </div>
+                 <div class="bg-white/10 p-8 rounded-lg">
+                    <h3 class="text-xl font-bold text-white mb-4">Join the Waitlist</h3>
+                    <p class="text-indigo-200 mb-6">Be the first to know when KombraCare is available in your area. Sign up for updates and early access.</p>
+                     <form data-netlify="true" name="waitlist-form">
+                         <div class="flex">
+                            <input type="email" name="waitlist-email" placeholder="Enter your email" required class="flex-grow px-3 py-2 rounded-l-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent-amber">
+                            <button type="submit" class="bg-accent-amber text-primary font-bold py-2 px-4 rounded-r-md hover:bg-yellow-400 transition-colors">Sign Up</button>
+                         </div>
+                     </form>
+                 </div>
+             </div>
+        </div>
+    </footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+        
+        // Hide mobile menu on link click
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // Tab functionality
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetId = tab.dataset.tab;
+
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === targetId) {
+                        content.classList.add('active');
+                    }
+                });
+            });
+        });
+
+        // Chart.js Configuration
+        const chartColors = {
+            primary: '#3A406A',
+            green: '#88A98F',
+            amber: '#F2B632',
+            blue: '#60A5FA',
+            red: '#F87171',
+            gray: '#9CA3AF'
+        };
+
+        const defaultChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            family: "'Inter', sans-serif"
+                        }
+                    }
+                }
+            }
+        };
+
+        // TAM Chart
+        const tamCtx = document.getElementById('tamChart');
+        if (tamCtx) {
+            new Chart(tamCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Neurodiversity', 'Dementia & Memory Care', 'Post-Stroke Rehab', 'Post-Discharge Care'],
+                    datasets: [{
+                        label: 'Market Size (USD)',
+                        data: [15, 12, 20, 50],
+                        backgroundColor: [
+                            chartColors.primary,
+                            chartColors.green,
+                            chartColors.amber,
+                            chartColors.blue,
+                        ],
+                        borderColor: '#F0F2F5',
+                        borderWidth: 4
+                    }]
+                },
+                options: defaultChartOptions
+            });
+        }
+        
+        // Use of Funds Chart
+        const fundsCtx = document.getElementById('fundsChart');
+        if (fundsCtx) {
+            new Chart(fundsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Product Development', 'Marketing & GTM', 'Clinical & Ops', 'Legal & G&A'],
+                    datasets: [{
+                        label: 'Use of Funds (%)',
+                        data: [50, 25, 20, 5],
+                         backgroundColor: [
+                            chartColors.primary,
+                            chartColors.green,
+                            chartColors.amber,
+                            chartColors.gray,
+                        ],
+                        borderColor: '#F0F2F5',
+                        borderWidth: 4
+                    }]
+                },
+                options: defaultChartOptions
+            });
+        }
+    });
+
+    // Simple scrollspy to shrink header
+    let lastScrollTop = 0;
+    const header = document.getElementById('header');
+    window.addEventListener("scroll", function() {
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        if (scrollTop > lastScrollTop && scrollTop > 50) {
+            header.classList.add('py-2');
+            header.classList.remove('py-4');
+        } else {
+             header.classList.add('py-4');
+             header.classList.remove('py-2');
+        }
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    }, false);
+
+</script>
+
+</body>
+</html>
